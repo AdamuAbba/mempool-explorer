@@ -96,10 +96,81 @@ dependencies = [
 ]
 
 [[package]]
+name = "base64"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
+
+[[package]]
+name = "bech32"
+version = "0.10.0-beta"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98f7eed2b2781a6f0b5c903471d48e15f56fb4e1165df8a9a2337fd1a59d45ea"
+
+[[package]]
 name = "binascii"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "383d29d513d8764dcdc42ea295d979eb99c3c9f00607b3692cf68a431f7dca72"
+
+[[package]]
+name = "bitcoin"
+version = "0.31.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd00f3c09b5f21fb357abe32d29946eb8bb7a0862bae62c0b5e4a692acbbe73c"
+dependencies = [
+ "bech32",
+ "bitcoin-internals",
+ "bitcoin_hashes",
+ "hex-conservative",
+ "hex_lit",
+ "secp256k1",
+ "serde",
+]
+
+[[package]]
+name = "bitcoin-internals"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9425c3bf7089c983facbae04de54513cce73b41c7f9ff8c845b54e7bc64ebbfb"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "bitcoin_hashes"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1930a4dabfebb8d7d9992db18ebe3ae2876f0a305fab206fd168df931ede293b"
+dependencies = [
+ "bitcoin-internals",
+ "hex-conservative",
+ "serde",
+]
+
+[[package]]
+name = "bitcoincore-rpc"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8eb70725a621848c83b3809913d5314c0d20ca84877d99dd909504b564edab00"
+dependencies = [
+ "bitcoincore-rpc-json",
+ "jsonrpc",
+ "log",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "bitcoincore-rpc-json"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "856ffbee2e492c23bca715d72ea34aae80d58400f2bda26a82015d6bc2ec3662"
+dependencies = [
+ "bitcoin",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "bitflags"
@@ -380,6 +451,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 
 [[package]]
+name = "hex-conservative"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "30ed443af458ccb6d81c1e7e661545f94d3176752fb1df2f543b902a1e0f51e2"
+
+[[package]]
+name = "hex_lit"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3011d1213f159867b13cfd6ac92d2cd5f1345762c63be3554e84092d85a50bbd"
+
+[[package]]
 name = "http"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -470,6 +553,17 @@ name = "itoa"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b1a46d1a171d865aa5f83f92695765caa047a9b4cbae2cbf37dbd613a793fd4c"
+
+[[package]]
+name = "jsonrpc"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8128f36b47411cd3f044be8c1f5cc0c9e24d1d1bfdc45f0a57897b32513053f2"
+dependencies = [
+ "base64",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "lazy_static"
@@ -964,6 +1058,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
+name = "secp256k1"
+version = "0.28.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d24b59d129cdadea20aea4fb2352fa053712e5d713eee47d700cd4b2bc002f10"
+dependencies = [
+ "bitcoin_hashes",
+ "rand",
+ "secp256k1-sys",
+ "serde",
+]
+
+[[package]]
+name = "secp256k1-sys"
+version = "0.9.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e5d1746aae42c19d583c3c1a8c646bfad910498e2051c551a7f2e3c0c9fbb7eb"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.197"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1007,6 +1122,8 @@ dependencies = [
 name = "server"
 version = "0.1.0"
 dependencies = [
+ "bitcoincore-rpc",
+ "lazy_static",
  "rocket",
  "serde",
 ]
