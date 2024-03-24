@@ -49,6 +49,8 @@ The project focuses on analyzing decoded transaction data retrieved from the mem
    ```bash
    npm start
    ```
+3. Start bitcoind
+ 
 4. Run the backend server
    ```bash
    cargo run
