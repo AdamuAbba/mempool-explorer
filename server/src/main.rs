@@ -1,21 +1,25 @@
 #[macro_use]
 extern crate lazy_static;
 
-#[macro_use] 
+#[macro_use]
 extern crate rocket;
 extern crate bitcoincore_rpc;
 
-use bitcoincore_rpc::{ Auth, Client, RpcApi };
-
+use bitcoincore_rpc::{Auth, Client, RpcApi};
+use dotenvy::dotenv;
+use std::env;
 
 lazy_static! {
-    // TODO: use environment variables instead of hardcoding
-    static ref RPC: Client = Client::new("http://localhost:18443",
-        Auth::UserPass("SulaimanAminuBarkindo".to_string(), "MWCSZAsVdoSUE2q7BuzV6uuEECH8__MQ21-Yru764DI".to_string()),
-    )
-    .unwrap();
+    static ref RPC: Client = {
+        dotenv().ok();
+        let rpc_url = env::var("RPC_URL").expect("RPC_URL not set");
+        let rpc_user = env::var("RPC_USER").expect("RPC_USER not set");
+        let rpc_pass = env::var("RPC_PASS").expect("RPC_PASS not set");
+        
+        Client::new(&rpc_url, Auth::UserPass(rpc_user, rpc_pass))
+            .expect("Failed to create RPC client")
+    };
 }
-
 
 #[get("/search?<txid>")]
 fn search(txid: &str) -> String {
@@ -29,4 +33,3 @@ fn rocket() -> _ {
 
     rocket::build().mount("/", routes![search])
 }
-
