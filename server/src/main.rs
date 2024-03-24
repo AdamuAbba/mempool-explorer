@@ -5,8 +5,10 @@ extern crate lazy_static;
 extern crate rocket;
 extern crate bitcoincore_rpc;
 
-use bitcoincore_rpc::{Auth, Client, RpcApi};
+use bitcoincore_rpc::json::GetRawTransactionResult;
+use bitcoincore_rpc::{ Auth, Client, RpcApi };
 use dotenvy::dotenv;
+use rocket::response::status::BadRequest;
 use std::env;
 
 lazy_static! {
@@ -22,14 +24,30 @@ lazy_static! {
 }
 
 #[get("/search?<txid>")]
-fn search(txid: &str) -> String {
-    format!("{}", txid)
+fn search(txid: &str) -> Result<String, BadRequest<String>> {
+    match get_raw_transaction(txid) {
+        Ok(raw_tx) => Ok(format!("{:?}", raw_tx)),
+        Err(_e) => Err(BadRequest("Error getting transaction details".to_string())),
+    }
 }
+
+fn get_raw_transaction(txid: &str) -> Result<GetRawTransactionResult, BadRequest<String>> {
+    // Parse the transaction ID from string to bitcoincore_rpc::bitcoin::Txid
+    let txid = match txid.parse::<bitcoincore_rpc::bitcoin::Txid>() {
+        Ok(txid) => txid,
+        Err(_) => return Err(BadRequest("Failed to parse transaction ID".to_string())),
+    };
+    
+    let tx = match RPC.get_raw_transaction_info(&txid, None) {
+        Ok(tx) => tx,
+        Err(_) => return Err(BadRequest("Error getting transaction details".to_string())),
+    };
+
+    Ok(tx)
+}
+
 
 #[launch]
 fn rocket() -> _ {
-    let best_block_hash = RPC.get_best_block_hash().unwrap();
-    println!("best block hash: {}", best_block_hash);
-
     rocket::build().mount("/", routes![search])
 }
