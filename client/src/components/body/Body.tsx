@@ -9,7 +9,7 @@ export const Body = () => {
             <p className="text-lg font-bold text-white">Transaction Details*</p>
             <div className="flex grow rounded-lg bg-slate-200 shadow-md"></div>
           </div>
-          <div className="py-4 flex flex-col">
+          {/* <div className="py-4 flex flex-col">
             <p className="text-lg text-white font-bold">Network*</p>
             <select className="w-full bg-white text-black  border-slate-200 py-2  border-2 shadow-md">
               {Networks.map((item, index) => (
@@ -18,14 +18,8 @@ export const Body = () => {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
         </div>
-        <button
-          type="submit"
-          className="bg-blue-400 w-fit self-center text-white shadow-md rounded-sm p-5 px-8"
-        >
-          Query Mempool
-        </button>
       </form>
     </main>
   );
