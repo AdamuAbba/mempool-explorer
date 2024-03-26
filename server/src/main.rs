@@ -5,6 +5,7 @@ extern crate lazy_static;
 extern crate rocket;
 extern crate bitcoincore_rpc;
 extern crate serde_json; 
+extern crate rocket_cors;
 
 use bitcoincore_rpc::json::GetRawTransactionResult;
 use bitcoincore_rpc::{Auth, Client, RpcApi};
@@ -12,6 +13,32 @@ use dotenvy::dotenv;
 use rocket::response::status::BadRequest;
 use serde_json::to_string;
 use std::env;
+use rocket::http::Method;
+use rocket_cors::{
+    AllowedHeaders, AllowedOrigins,
+    Cors, CorsOptions
+};
+
+fn make_cors() -> Cors {
+    let allowed_origins = AllowedOrigins::some_exact(&[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ]);
+
+    CorsOptions {
+        allowed_origins,
+        allowed_methods: vec![Method::Get].into_iter().map(From::from).collect(),
+        allowed_headers: AllowedHeaders::some(&[
+            "Authorization",
+            "Accept",
+            "Access-Control-Allow-Origin",
+        ]),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()
+    .expect("error while building CORS")
+}
 
 lazy_static! {
     static ref RPC: Client = {
@@ -55,5 +82,5 @@ fn get_raw_transaction(txid: &str) -> Result<GetRawTransactionResult, BadRequest
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![search])
+    rocket::build().mount("/", routes![search]).attach(make_cors())
 }
