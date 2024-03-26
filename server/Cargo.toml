@@ -9,3 +9,4 @@ lazy_static = "1.4.0"
 rocket = {version = "0.5.0-rc.2", features = ["json"] }
 serde = "1.0.136"
 dotenvy = "0.15"
+serde_json = "1.0.115"

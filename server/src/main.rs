@@ -4,11 +4,13 @@ extern crate lazy_static;
 #[macro_use]
 extern crate rocket;
 extern crate bitcoincore_rpc;
+extern crate serde_json; 
 
 use bitcoincore_rpc::json::GetRawTransactionResult;
-use bitcoincore_rpc::{ Auth, Client, RpcApi };
+use bitcoincore_rpc::{Auth, Client, RpcApi};
 use dotenvy::dotenv;
 use rocket::response::status::BadRequest;
+use serde_json::to_string;
 use std::env;
 
 lazy_static! {
@@ -26,8 +28,13 @@ lazy_static! {
 #[get("/search?<txid>")]
 fn search(txid: &str) -> Result<String, BadRequest<String>> {
     match get_raw_transaction(txid) {
-        Ok(raw_tx) => Ok(format!("{:?}", raw_tx)),
-        Err(_e) => Err(BadRequest("Error getting transaction details".to_string())),
+        Ok(raw_tx) => {
+            // Serialize GetRawTransactionResult into a JSON string
+            let json_response = to_string(&raw_tx)
+                .map_err(|_| BadRequest("Error serializing transaction details".to_string()))?;
+            Ok(json_response)
+        },
+        Err(_) => Err(BadRequest("Error getting transaction details".to_string())),
     }
 }
 
@@ -45,7 +52,6 @@ fn get_raw_transaction(txid: &str) -> Result<GetRawTransactionResult, BadRequest
 
     Ok(tx)
 }
-
 
 #[launch]
 fn rocket() -> _ {
