@@ -38,8 +38,8 @@ fn search(txid: &str) -> Result<String, BadRequest<String>> {
     }
 }
 
-#[get("/mempool?<count>")]
-fn mempool(count: Option<usize>) -> Result<String, BadRequest<String>> {
+#[get("/recent-transactions?<count>")]
+fn get_recent_transactions(count: Option<usize>) -> Result<String, BadRequest<String>> {
     let count = count.unwrap_or(6); // Default to 6 transactions if count is not provided
 
     let mempool_txids = match RPC.get_raw_mempool() {
@@ -80,5 +80,5 @@ fn get_raw_transaction(txid: &str) -> Result<GetRawTransactionResult, BadRequest
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![search, mempool])
+    rocket::build().mount("/", routes![search, get_recent_transactions])
 }
