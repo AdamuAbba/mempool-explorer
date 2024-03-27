@@ -65,6 +65,31 @@ fn search(txid: &str) -> Result<String, BadRequest<String>> {
     }
 }
 
+#[get("/recent-transactions?<count>")]
+fn get_recent_transactions(count: Option<usize>) -> Result<String, BadRequest<String>> {
+    let count = count.unwrap_or(6); // Default to 6 transactions if count is not provided
+
+    let mempool_txids = match RPC.get_raw_mempool() {
+        Ok(txids) => txids,
+        Err(_) => return Err(BadRequest("Error getting mempool transactions".to_string())),
+    };
+
+    // Limit the number of transactions to the specified count
+    let mempool_txids = if count < mempool_txids.len() {
+        &mempool_txids[..count]
+    } else {
+        &mempool_txids
+    };
+
+    // Convert Txid to String
+    let mempool_txids: Vec<String> = mempool_txids.into_iter().map(|txid| txid.to_string()).collect();
+
+    // Serialize the list of transaction IDs into a JSON string
+    let json_response = to_string(&mempool_txids)
+        .map_err(|_| BadRequest("Error serializing mempool transactions".to_string()))?;
+    Ok(json_response)
+}
+
 fn get_raw_transaction(txid: &str) -> Result<GetRawTransactionResult, BadRequest<String>> {
     // Parse the transaction ID from string to bitcoincore_rpc::bitcoin::Txid
     let txid = match txid.parse::<bitcoincore_rpc::bitcoin::Txid>() {
@@ -82,5 +107,5 @@ fn get_raw_transaction(txid: &str) -> Result<GetRawTransactionResult, BadRequest
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![search]).attach(make_cors())
+    rocket::build().mount("/", routes![search, get_recent_transactions]).attach(make_cors())
 }
