@@ -10,7 +10,11 @@ export const mempoolExplorerApi = createApi({
     searchForTransaction: builder.query<IResponse, string | null>({
       query: (txId) => `search?txid=${txId}`,
     }),
+    recentTransactions: builder.query<string[], string | null>({
+      query: (count) => `recent-transactions?count=${count}`,
+    }),
   }),
 });
 
-export const { useSearchForTransactionQuery } = mempoolExplorerApi;
+export const { useSearchForTransactionQuery, useRecentTransactionsQuery } =
+  mempoolExplorerApi;
