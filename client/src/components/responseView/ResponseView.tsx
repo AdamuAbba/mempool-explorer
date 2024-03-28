@@ -1,13 +1,26 @@
-import { useAppSelector } from "../../hooks";
-import { useSearchForTransactionQuery } from "../../services";
-import { selectTxId } from "../../store/slices";
-import { PropagateLoader } from "react-spinners";
+import { useEffect } from "react";
 import { IoMdArrowRoundForward } from "react-icons/io";
+import { PropagateLoader } from "react-spinners";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import {
+  useRecentTransactionsQuery,
+  useSearchForTransactionQuery,
+} from "../../services";
+import { selectRecentTxCount, selectTxId, setTxid } from "../../store/slices";
 
 const ResponseView = () => {
   const txId = useAppSelector(selectTxId);
-  const { data, error, isFetching, isError } =
-    useSearchForTransactionQuery(txId);
+  const recentTxCount = useAppSelector(selectRecentTxCount);
+  const dispatch = useAppDispatch();
+
+  const { data: latestTransaction, isLoading } =
+    useRecentTransactionsQuery(recentTxCount);
+
+  useEffect(() => {
+    if (txId === null && !isLoading) dispatch(setTxid(latestTransaction![0]));
+  }, [dispatch, latestTransaction, txId, isLoading]);
+
+  const { data, isFetching, isError } = useSearchForTransactionQuery(txId);
   console.log(data);
 
   if (!txId) {
@@ -21,7 +34,7 @@ const ResponseView = () => {
   if (isError) {
     return (
       <div className="w-full flex justify-center items-center h-screen bg-transparent">
-        <p>oops! there was an error </p>
+        <p>oops! there was an error</p>
       </div>
     );
   }
@@ -65,13 +78,13 @@ const ResponseView = () => {
           <p>
             <b>size</b>
           </p>
-          <p className="text-wrap break-words w-[80%]">{data?.size}</p>
+          <p className="text-wrap break-words w-[80%]">{data?.size}B</p>
         </div>
         <div className="flex flex-row justify-between border-y-2 border-gray-400 py-3 w-[80%]">
           <p>
             <b>vsize</b>
           </p>
-          <p className="text-wrap break-words w-[80%]">{data?.vsize}</p>
+          <p className="text-wrap break-words w-[80%]">{data?.vsize}vB</p>
         </div>
         <div className="flex flex-row justify-between border-y-2 border-gray-400 py-3 w-[80%]">
           <p>
