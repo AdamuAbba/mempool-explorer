@@ -11,6 +11,7 @@ use bitcoincore_rpc::json::GetRawTransactionResult;
 use bitcoincore_rpc::{Auth, Client, RpcApi};
 use dotenvy::dotenv;
 use rocket::response::status::BadRequest;
+use serde::Serialize;
 use serde_json::to_string;
 use std::env;
 use rocket::http::Method;
@@ -18,6 +19,12 @@ use rocket_cors::{
     AllowedHeaders, AllowedOrigins,
     Cors, CorsOptions
 };
+
+#[derive(Serialize)]
+pub struct TransactionWithMempool {
+    pub raw_transaction: GetRawTransactionResult,
+    pub in_mempool: bool,
+}
 
 fn make_cors() -> Cors {
     let allowed_origins = AllowedOrigins::some_exact(&[
@@ -90,19 +97,39 @@ fn get_recent_transactions(count: Option<usize>) -> Result<String, BadRequest<St
     Ok(json_response)
 }
 
-fn get_raw_transaction(txid: &str) -> Result<GetRawTransactionResult, BadRequest<String>> {
+fn get_raw_transaction(txid: &str) -> Result<TransactionWithMempool, BadRequest<String>> {
     // Parse the transaction ID from string to bitcoincore_rpc::bitcoin::Txid
     let txid = match txid.parse::<bitcoincore_rpc::bitcoin::Txid>() {
         Ok(txid) => txid,
         Err(_) => return Err(BadRequest("Failed to parse transaction ID".to_string())),
     };
-    
+
+    // get transaction details using get_raw_transaction_info
     let tx = match RPC.get_raw_transaction_info(&txid, None) {
         Ok(tx) => tx,
         Err(_) => return Err(BadRequest("Error getting transaction details".to_string())),
     };
 
-    Ok(tx)
+    // check if the result has a timestamp (time != null)
+    if let Some(_time) = tx.time {
+        return Ok(TransactionWithMempool {
+            in_mempool: false,
+            raw_transaction: tx  
+        });
+    } else {
+        // use get_mempool_entry to get the transaction time from the mempool
+        if let Ok(mempool_entry) = RPC.get_mempool_entry(&txid) {
+            // replace the null time with the time obtained from mempool
+            let mut new_tx = tx.clone(); // clone the original transaction
+            new_tx.time = Some(mempool_entry.time as usize); // set time from mempool entry
+            return Ok(TransactionWithMempool {
+                in_mempool: true,
+                raw_transaction: new_tx, // use the modified transaction
+            });
+        } else {
+            return Err(BadRequest("Error getting mempool entry".to_string()));
+        }
+    }
 }
 
 #[launch]
