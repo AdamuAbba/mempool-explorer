@@ -69,7 +69,7 @@ const RecentTransactionsView = (): JSX.Element => {
     <div className="w-full">
       <div className="flex flex-row space-x-4">
         <p className="text-white text-2xl pl-6 text-shadow shadow-black">
-          Recent transactions
+          Recent transactions in mempool
         </p>
         <select
           defaultValue={6}

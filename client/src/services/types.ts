@@ -1,4 +1,4 @@
-export type IResponse = {
+type RAW_TRANSACTION = {
   in_active_chain: null | any;
   hex: string;
   txid: string;
@@ -13,6 +13,11 @@ export type IResponse = {
   confirmations: null | any;
   time: null | any;
   blocktime: null | any;
+};
+
+export type IResponse = {
+  raw_transaction: RAW_TRANSACTION;
+  in_mempool: boolean;
 };
 
 type VIN = {
